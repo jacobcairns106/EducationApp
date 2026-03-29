@@ -1,0 +1,92 @@
+.join-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  width: 100vw;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #1a1a2e;
+  color: #fff;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.join-card {
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 12px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.join-card h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.join-card input {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #0f3460;
+  background: #1a1a2e;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.join-card input::placeholder {
+  color: #e2e2e2;
+  opacity: 0.45;
+}
+
+.join-card input:focus {
+  outline: 2px solid #1368ce;
+  outline-offset: -1px;
+}
+
+.join-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #1368ce;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.join-btn:active {
+  transform: scale(0.96);
+}
+
+.join-error {
+  font-size: 0.9rem;
+  color: #e74c3c;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .join-card {
+    padding: 40px 32px;
+    gap: 18px;
+  }
+
+  .join-card h1 {
+    font-size: 1.6rem;
+  }
+}

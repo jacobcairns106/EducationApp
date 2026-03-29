@@ -1,0 +1,87 @@
+.create-session-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  width: 100vw;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #1a1a2e;
+  color: #fff;
+  padding: 32px 16px;
+  box-sizing: border-box;
+}
+
+.create-session-card {
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 14px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.create-session-card h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.create-session-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.5;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.create-session-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #1368ce;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.create-session-btn:hover {
+  opacity: 0.85;
+}
+
+.create-session-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.create-session-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.create-session-error {
+  font-size: 0.85rem;
+  color: #e74c3c;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .create-session-card {
+    padding: 40px 32px;
+    gap: 18px;
+  }
+
+  .create-session-card h1 {
+    font-size: 1.6rem;
+  }
+}

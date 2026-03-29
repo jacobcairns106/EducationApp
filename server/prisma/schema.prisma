@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum QuestionType {
+  MCQ
+  TEXT
+}
+
+// A session is a live room that students join via a unique code.
+// It can host multiple quiz runs (one at a time). isEnded is set permanently when the lecturer ends it.
+model Session {
+  id        String     @id @default(cuid())
+  code      String     @unique
+  createdAt DateTime   @default(now())
+  isEnded        Boolean    @default(false)
+  lastQuizTitle  String?                   // title of the most recently started quiz
+  sessionQuestions     SessionQuestion[]
+  responses     Response[]
+}
+
+model Lecturer {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  quizzes      Quiz[]
+}
+
+// A quiz is a reusable template owned by a lecturer. Its QuizQuestions are the
+// "master copy" — when a quiz is started in a session, they are snapshotted into SessionQuestions.
+model Quiz {
+  id         String    @id @default(cuid())
+  title      String
+  createdAt  DateTime  @default(now())
+  lecturerId String?
+  lecturer   Lecturer? @relation(fields: [lecturerId], references: [id], onDelete: SetNull)
+  questions  QuizQuestion[]
+  @@index([lecturerId])
+}
+
+// Template question within a quiz. `correct` is the 0-based index of the right MCQ option (null for TEXT).
+model QuizQuestion {
+  id        String       @id @default(cuid())
+  quizId    String
+  order     Int
+  prompt    String
+  options   String[]     // MCQ answer choices; empty array for TEXT questions
+  correct   Int?         // index into options[] for MCQ; null for TEXT
+  seconds   Int?
+  type      QuestionType @default(MCQ)
+  quiz      Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  @@index([quizId, order])
+  @@unique([quizId, order])
+}
+
+// A snapshot of a QuizQuestion for a specific session run. Decoupled from the quiz template
+// so that editing a quiz doesn't affect an in-progress session. isActive marks the question
+// students are currently answering — only one can be active per session at a time.
+model SessionQuestion {
+  id        String       @id @default(cuid())
+  sessionId String
+  index     Int
+  prompt    String
+  options   String[]
+  correct   Int?
+  type      QuestionType @default(MCQ)
+  createdAt DateTime     @default(now())
+  isActive  Boolean      @default(true)
+  session   Session      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  responses Response[]
+  @@index([sessionId, isActive])
+  @@unique([sessionId, index])
+}
+
+// A student's answer. Uniqueness on (questionId, voterKey) means one vote per student per question,
+// but the upsert in the response:submit handler allows changing the answer before the question locks.
+// voterKey is a client-generated UUID stored in localStorage (no auth needed for students).
+model Response {
+  id         String   @id @default(cuid())
+  sessionId  String
+  questionId String
+  voterKey   String
+  textValue  String?        // free-text answer (TEXT questions)
+  intValue   Int?           // selected option index (MCQ questions)
+  createdAt  DateTime @default(now())
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question   SessionQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@unique([questionId, voterKey])
+  @@index([sessionId])
+}
