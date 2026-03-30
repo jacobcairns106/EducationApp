@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
+  QuizStartPayload,
 } from "../../shared/socketTypes.js";
 
 export const app = express();
@@ -468,7 +469,7 @@ io.on("connection", (socket) => {
 
   // Lecturer starts a quiz: clears previous data, copies quiz questions into
   // SessionQuestion rows (snapshot), and broadcasts the first question.
-  socket.on("quiz:start", async (payload) => {
+  socket.on("quiz:start", async (payload: QuizStartPayload) => {
     const sessionCode = payload.code.trim().toUpperCase();
 
     const session = await prisma.session.findUnique({ where: { code: sessionCode } });
