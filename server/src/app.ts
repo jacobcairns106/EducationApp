@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
-} from "../../shared/socketTypes.ts";
+} from "../../shared/socketTypes.js";
 
 export const app = express();
 
@@ -163,8 +163,9 @@ app.get("/api/quizzes", requireLecturer, async (req, res) => {
 // lecturers can only access their own quizzes (returns 404 to avoid leaking existence).
 app.get("/api/quizzes/:id", requireLecturer, async (req, res) => {
   const lecturerId = (req as any).lecturerId;
+  const id = req.params.id as string;
   const quiz = await prisma.quiz.findUnique({
-    where: { id: req.params.id },
+    where: { id },
     include: { questions: { orderBy: { order: "asc" } } },
   });
   if (!quiz || quiz.lecturerId !== lecturerId) return res.status(404).json({ error: "Quiz not found" });
@@ -207,6 +208,7 @@ app.post("/api/quizzes", requireLecturer, async (req, res) => {
 
 app.put("/api/quizzes/:id", requireLecturer, async (req, res) => {
   const lecturerId = (req as any).lecturerId;
+  const id = req.params.id as string;
   const { title, questions } = req.body as {
     title: string;
     questions: { prompt: string; type: string; options: string[]; correct: number | null; order: number }[];
@@ -214,17 +216,17 @@ app.put("/api/quizzes/:id", requireLecturer, async (req, res) => {
 
   if (!title?.trim()) return res.status(400).json({ error: "Title is required" });
 
-  const existing = await prisma.quiz.findUnique({ where: { id: req.params.id } });
+  const existing = await prisma.quiz.findUnique({ where: { id } });
   if (!existing || existing.lecturerId !== lecturerId) return res.status(404).json({ error: "Quiz not found" });
 
   // Transaction: delete all existing questions then recreate them.
   // This "replace-all" approach is simpler than diffing individual question changes
   // and keeps the order values consistent.
   const quiz = await prisma.$transaction(async (tx) => {
-    await tx.quizQuestion.deleteMany({ where: { quizId: req.params.id } });
+    await tx.quizQuestion.deleteMany({ where: { quizId: id } });
 
     return tx.quiz.update({
-      where: { id: req.params.id },
+      where: { id },
       data: {
         title: title.trim(),
         questions: {
@@ -246,10 +248,11 @@ app.put("/api/quizzes/:id", requireLecturer, async (req, res) => {
 
 app.delete("/api/quizzes/:id", requireLecturer, async (req, res) => {
   const lecturerId = (req as any).lecturerId;
-  const existing = await prisma.quiz.findUnique({ where: { id: req.params.id } });
+  const id = req.params.id as string;
+  const existing = await prisma.quiz.findUnique({ where: { id } });
   if (!existing || existing.lecturerId !== lecturerId) return res.status(404).json({ error: "Quiz not found" });
 
-  await prisma.quiz.delete({ where: { id: req.params.id } });
+  await prisma.quiz.delete({ where: { id } });
   res.json({ ok: true });
 });
 
@@ -465,7 +468,7 @@ io.on("connection", (socket) => {
 
   // Lecturer starts a quiz: clears previous data, copies quiz questions into
   // SessionQuestion rows (snapshot), and broadcasts the first question.
-  socket.on("quiz:start", async (payload: { code: string; quizId: string }) => {
+  socket.on("quiz:start", async (payload) => {
     const sessionCode = payload.code.trim().toUpperCase();
 
     const session = await prisma.session.findUnique({ where: { code: sessionCode } });
