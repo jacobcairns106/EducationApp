@@ -8,7 +8,7 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents,
   QuizStartPayload,
-} from "../../shared/socketTypes.js";
+} from "./socketTypes.js";
 
 export const app = express();
 
